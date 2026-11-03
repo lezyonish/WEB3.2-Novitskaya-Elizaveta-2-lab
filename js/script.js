@@ -68,13 +68,42 @@ function renderTasks() {
         const taskItem = document.createElement('li');
         taskItem.className = 'task-item';
 
+        if (task.completed) {
+            taskItem.classList.add('completed');
+        }
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.setAttribute('aria-label', 'Выполнение задачи: ' + task.title);
+
+        checkbox.addEventListener('change', function() {
+            toggleTask(task.id);
+        });
+
+        const taskDetails = document.createElement('div');
+        taskDetails.className = 'task-details';
+
         const taskName = document.createElement('span');
+        taskName.className = 'task-name';
         taskName.textContent = task.title;
 
         const taskDate = document.createElement('time');
+        taskDate.className = 'task-date';
         taskDate.dateTime = task.date;
         taskDate.textContent = new Date(task.date + 'T00:00:00')
             .toLocaleDateString('ru-RU');
+
+        taskDetails.append(taskName, taskDate);
+
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'edit-button';
+        editButton.textContent = 'Изменить';
+
+        editButton.addEventListener('click', function() {
+            editTask(task, taskItem);
+        });
 
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
@@ -85,7 +114,7 @@ function renderTasks() {
             deleteTask(task.id);
         });
 
-        taskItem.append(taskName, taskDate, deleteButton);
+        taskItem.append(checkbox, taskDetails, editButton, deleteButton);
         taskList.append(taskItem);
     });
 }
@@ -125,6 +154,68 @@ function deleteTask(id) {
         tasks.splice(taskIndex, 1);
         renderTasks();
     }
+}
+
+function toggleTask(id) {
+    const task = tasks.find(function(item) {
+        return item.id === id;
+    });
+
+    if (task) {
+        task.completed = !task.completed;
+        renderTasks();
+    }
+}
+
+function editTask(task, taskItem) {
+    const editForm = document.createElement('form');
+    editForm.className = 'edit-form';
+
+    const titleField = document.createElement('input');
+    titleField.type = 'text';
+    titleField.value = task.title;
+    titleField.required = true;
+    titleField.setAttribute('aria-label', 'Название задачи');
+
+    const dateField = document.createElement('input');
+    dateField.type = 'date';
+    dateField.value = task.date;
+    dateField.required = true;
+    dateField.setAttribute('aria-label', 'Дата выполнения');
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.textContent = 'Сохранить';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = 'Отмена';
+
+    editForm.append(titleField, dateField, saveButton, cancelButton);
+    taskItem.replaceChildren(editForm);
+
+    editForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const newTitle = titleField.value.trim();
+
+        if (!newTitle) {
+            titleField.value = '';
+            titleField.reportValidity();
+            return;
+        }
+
+        task.title = newTitle;
+        task.date = dateField.value;
+
+        renderTasks();
+    });
+
+    cancelButton.addEventListener('click', function() {
+        renderTasks();
+    });
+
+    titleField.focus();
 }
 
 taskForm.addEventListener('submit', addTask);
