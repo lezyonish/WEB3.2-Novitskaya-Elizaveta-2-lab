@@ -45,6 +45,47 @@ tasksSection.className = 'tasks-section';
 const tasksHeading = document.createElement('h2');
 tasksHeading.textContent = 'Список задач';
 
+const searchLabel = document.createElement('label');
+searchLabel.textContent = 'Поиск по названию';
+searchLabel.htmlFor = 'task-search';
+
+const searchInput = document.createElement('input');
+searchInput.type = 'search';
+searchInput.id = 'task-search';
+searchInput.className = 'task-search';
+searchInput.placeholder = 'Найти задачу...';
+
+const filterButtons = document.createElement('div');
+filterButtons.className = 'filter-buttons';
+filterButtons.setAttribute('role', 'group');
+filterButtons.setAttribute('aria-label', 'Фильтр задач по статусу');
+
+const filters = [
+    { value: 'all', label: 'Все' },
+    { value: 'active', label: 'Активные' },
+    { value: 'completed', label: 'Выполненные' }
+];
+
+const filterButtonElements = [];
+
+filters.forEach(function(filter) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'filter-button';
+    button.textContent = filter.label;
+
+    button.addEventListener('click', function() {
+        currentFilter = filter.value;
+        renderTasks();
+    });
+
+    filterButtons.append(button);
+    filterButtonElements.push({
+        element: button,
+        value: filter.value
+    });
+});
+
 const taskList = document.createElement('ul');
 taskList.className = 'task-list';
 
@@ -52,19 +93,56 @@ const emptyMessage = document.createElement('p');
 emptyMessage.className = 'empty-message';
 emptyMessage.textContent = 'Задач пока нет';
 
-tasksSection.append(tasksHeading, taskList, emptyMessage);
+tasksSection.append(
+    tasksHeading,
+    searchLabel,
+    searchInput,
+    filterButtons,
+    taskList,
+    emptyMessage
+);
 
 main.append(title, taskForm, tasksSection);
 document.body.append(main);
 
 const tasks = [];
+let currentFilter = 'all';
 
 function renderTasks() {
     taskList.replaceChildren();
 
-    emptyMessage.hidden = tasks.length > 0;
+    const searchText = searchInput.value.trim().toLowerCase();
 
-    tasks.forEach(function(task) {
+    const visibleTasks = tasks.filter(function(task) {
+        const matchesSearch = task.title.toLowerCase().includes(searchText);
+
+        let matchesStatus = true;
+
+        if (currentFilter === 'active') {
+            matchesStatus = !task.completed;
+        } else if (currentFilter === 'completed') {
+            matchesStatus = task.completed;
+        }
+
+        return matchesSearch && matchesStatus;
+    });
+
+    filterButtonElements.forEach(function(button) {
+        const isActive = button.value === currentFilter;
+
+        button.element.classList.toggle('active', isActive);
+        button.element.setAttribute('aria-pressed', String(isActive));
+    });
+
+    emptyMessage.hidden = visibleTasks.length > 0;
+
+    if (tasks.length === 0) {
+        emptyMessage.textContent = 'Задач пока нет';
+    } else {
+        emptyMessage.textContent = 'Подходящих задач не найдено';
+    }
+
+    visibleTasks.forEach(function(task) {
         const taskItem = document.createElement('li');
         taskItem.className = 'task-item';
 
@@ -139,6 +217,9 @@ function addTask(event) {
     };
 
     tasks.push(newTask);
+
+    searchInput.value = '';
+    currentFilter = 'all';
 
     renderTasks();
     taskForm.reset();
@@ -219,5 +300,6 @@ function editTask(task, taskItem) {
 }
 
 taskForm.addEventListener('submit', addTask);
+searchInput.addEventListener('input', renderTasks);
 
 renderTasks();

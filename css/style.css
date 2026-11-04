@@ -37,6 +37,48 @@ h1 {
     cursor: pointer;
 }
 
+.tasks-section h2 {
+    margin-bottom: 20px;
+}
+
+.task-search {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font: inherit;
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.filter-button {
+    padding: 9px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #222;
+    cursor: pointer;
+}
+
+.filter-button.active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+}
+
+.filter-button:hover {
+    border-color: #777;
+}
+
 .task-list {
     list-style: none;
     padding: 0;
@@ -119,5 +161,9 @@ h1 {
     .edit-button,
     .delete-button {
         padding: 7px;
+    }
+
+    .filter-button {
+        padding: 8px 12px;
     }
 }
