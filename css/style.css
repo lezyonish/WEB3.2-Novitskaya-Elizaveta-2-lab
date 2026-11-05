@@ -60,7 +60,7 @@ body {
 
 .app-title {
     position: relative;
-    display: grid !important;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     width: 100%;
@@ -86,9 +86,9 @@ body {
     white-space: nowrap;
 }
 
-.cats-image {
+.fish-image {
     display: block;
-    width: clamp(110px, 13vw, 140px) !important;
+    width: clamp(110px, 13vw, 140px);
     height: auto;
     object-fit: contain;
     justify-self: center;
@@ -427,8 +427,8 @@ button {
         padding-bottom: 18px;
     }
 
-    .cats-image {
-        width: 90px !important;
+    .fish-image {
+        width: 90px;
     }
 
     .swans-image {

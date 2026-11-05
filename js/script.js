@@ -7,24 +7,19 @@ header.className = 'app-header';
 
 const title = document.createElement('h1');
 title.className = 'app-title';
-title.style.display = 'flex';
-title.style.alignItems = 'center';
-title.style.justifyContent = 'center';
-title.style.gap = 'clamp(7px, 1.8vw, 16px)';
 
 const firstWord = document.createElement('span');
 firstWord.textContent = 'ToDo';
 
-const catsImage = document.createElement('img');
-catsImage.className = 'cats-image';
-catsImage.src = 'images/fish.png';
-catsImage.alt = '';
-catsImage.style.width = 'clamp(50px, 8vw, 82px)';
+const fishImage = document.createElement('img');
+fishImage.className = 'fish-image';
+fishImage.src = 'images/fish.png';
+fishImage.alt = '';
 
 const secondWord = document.createElement('span');
 secondWord.textContent = 'List';
 
-title.append(firstWord, catsImage, secondWord);
+title.append(firstWord, fishImage, secondWord);
 header.append(title);
 
 const taskForm = document.createElement('form');
