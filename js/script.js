@@ -138,7 +138,7 @@ const sortSelect = document.createElement('select');
 sortSelect.id = 'task-sort';
 
 const sortOptions = [
-    { value: 'default', label: 'Мой порядок' },
+    { value: 'default', label: 'Ручной порядок' },
     { value: 'date-asc', label: 'Сначала ближайшие' },
     { value: 'date-desc', label: 'Сначала поздние' }
 ];
