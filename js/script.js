@@ -86,6 +86,56 @@ filters.forEach(function(filter) {
     });
 });
 
+const taskControls = document.createElement('div');
+taskControls.className = 'task-controls';
+
+const dateFilterGroup = document.createElement('div');
+dateFilterGroup.className = 'control-group';
+
+const dateFilterLabel = document.createElement('label');
+dateFilterLabel.textContent = 'Поиск по дате';
+dateFilterLabel.htmlFor = 'date-filter';
+
+const dateFilterRow = document.createElement('div');
+dateFilterRow.className = 'date-filter-row';
+
+const dateFilterInput = document.createElement('input');
+dateFilterInput.type = 'date';
+dateFilterInput.id = 'date-filter';
+
+const resetDateButton = document.createElement('button');
+resetDateButton.type = 'button';
+resetDateButton.textContent = 'Сбросить дату';
+
+dateFilterRow.append(dateFilterInput, resetDateButton);
+dateFilterGroup.append(dateFilterLabel, dateFilterRow);
+
+const sortGroup = document.createElement('div');
+sortGroup.className = 'control-group';
+
+const sortLabel = document.createElement('label');
+sortLabel.textContent = 'Сортировка';
+sortLabel.htmlFor = 'task-sort';
+
+const sortSelect = document.createElement('select');
+sortSelect.id = 'task-sort';
+
+const sortOptions = [
+    { value: 'default', label: 'По добавлению' },
+    { value: 'date-asc', label: 'Сначала ближайшие' },
+    { value: 'date-desc', label: 'Сначала поздние' }
+];
+
+sortOptions.forEach(function(option) {
+    const optionElement = document.createElement('option');
+    optionElement.value = option.value;
+    optionElement.textContent = option.label;
+    sortSelect.append(optionElement);
+});
+
+sortGroup.append(sortLabel, sortSelect);
+taskControls.append(dateFilterGroup, sortGroup);
+
 const taskList = document.createElement('ul');
 taskList.className = 'task-list';
 
@@ -98,6 +148,7 @@ tasksSection.append(
     searchLabel,
     searchInput,
     filterButtons,
+    taskControls,
     taskList,
     emptyMessage
 );
@@ -112,9 +163,11 @@ function renderTasks() {
     taskList.replaceChildren();
 
     const searchText = searchInput.value.trim().toLowerCase();
+    const selectedDate = dateFilterInput.value;
 
     const visibleTasks = tasks.filter(function(task) {
         const matchesSearch = task.title.toLowerCase().includes(searchText);
+        const matchesDate = !selectedDate || task.date === selectedDate;
 
         let matchesStatus = true;
 
@@ -124,8 +177,18 @@ function renderTasks() {
             matchesStatus = task.completed;
         }
 
-        return matchesSearch && matchesStatus;
+        return matchesSearch && matchesDate && matchesStatus;
     });
+
+    if (sortSelect.value === 'date-asc') {
+        visibleTasks.sort(function(a, b) {
+            return a.date.localeCompare(b.date);
+        });
+    } else if (sortSelect.value === 'date-desc') {
+        visibleTasks.sort(function(a, b) {
+            return b.date.localeCompare(a.date);
+        });
+    }
 
     filterButtonElements.forEach(function(button) {
         const isActive = button.value === currentFilter;
@@ -133,6 +196,8 @@ function renderTasks() {
         button.element.classList.toggle('active', isActive);
         button.element.setAttribute('aria-pressed', String(isActive));
     });
+
+    resetDateButton.disabled = !selectedDate;
 
     emptyMessage.hidden = visibleTasks.length > 0;
 
@@ -219,6 +284,7 @@ function addTask(event) {
     tasks.push(newTask);
 
     searchInput.value = '';
+    dateFilterInput.value = '';
     currentFilter = 'all';
 
     renderTasks();
@@ -301,5 +367,12 @@ function editTask(task, taskItem) {
 
 taskForm.addEventListener('submit', addTask);
 searchInput.addEventListener('input', renderTasks);
+dateFilterInput.addEventListener('change', renderTasks);
+sortSelect.addEventListener('change', renderTasks);
+
+resetDateButton.addEventListener('click', function() {
+    dateFilterInput.value = '';
+    renderTasks();
+});
 
 renderTasks();
