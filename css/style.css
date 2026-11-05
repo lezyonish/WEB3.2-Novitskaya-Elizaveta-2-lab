@@ -146,6 +146,30 @@ h1 {
     border-bottom: 1px solid #ddd;
 }
 
+.task-item[draggable="true"] {
+    cursor: grab;
+}
+
+.task-item.dragging {
+    opacity: 0.4;
+}
+
+.task-item.drop-before {
+    border-top: 3px solid #333;
+}
+
+.task-item.drop-after {
+    border-bottom: 3px solid #333;
+}
+
+.drag-handle {
+    color: #777;
+    font-size: 22px;
+    user-select: none;
+    flex-shrink: 0;
+    cursor: grab;
+}
+
 .task-details {
     display: flex;
     flex-direction: column;

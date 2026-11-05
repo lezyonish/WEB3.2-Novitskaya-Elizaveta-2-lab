@@ -121,7 +121,7 @@ const sortSelect = document.createElement('select');
 sortSelect.id = 'task-sort';
 
 const sortOptions = [
-    { value: 'default', label: 'По добавлению' },
+    { value: 'default', label: 'Мой порядок' },
     { value: 'date-asc', label: 'Сначала ближайшие' },
     { value: 'date-desc', label: 'Сначала поздние' }
 ];
@@ -158,6 +158,7 @@ document.body.append(main);
 
 let tasks = [];
 let currentFilter = 'all';
+let draggedTaskId = null;
 
 try {
     const savedTasks = JSON.parse(localStorage.getItem('todoTasks'));
@@ -171,6 +172,35 @@ try {
 
 function saveTasks() {
     localStorage.setItem('todoTasks', JSON.stringify(tasks));
+}
+
+function moveTask(draggedId, targetId, insertAfter) {
+    const draggedIndex = tasks.findIndex(function(task) {
+        return task.id === draggedId;
+    });
+
+    const targetIndex = tasks.findIndex(function(task) {
+        return task.id === targetId;
+    });
+
+    if (draggedIndex === -1 || targetIndex === -1 || draggedId === targetId) {
+        return;
+    }
+
+    const movedTask = tasks.splice(draggedIndex, 1)[0];
+
+    let newIndex = tasks.findIndex(function(task) {
+        return task.id === targetId;
+    });
+
+    if (insertAfter) {
+        newIndex++;
+    }
+
+    tasks.splice(newIndex, 0, movedTask);
+
+    saveTasks();
+    renderTasks();
 }
 
 function renderTasks() {
@@ -204,6 +234,11 @@ function renderTasks() {
         });
     }
 
+    const canDrag = sortSelect.value === 'default'
+        && currentFilter === 'all'
+        && !searchText
+        && !selectedDate;
+
     filterButtonElements.forEach(function(button) {
         const isActive = button.value === currentFilter;
 
@@ -227,6 +262,75 @@ function renderTasks() {
 
         if (task.completed) {
             taskItem.classList.add('completed');
+        }
+
+        if (canDrag) {
+            taskItem.draggable = true;
+
+            const dragHandle = document.createElement('span');
+            dragHandle.className = 'drag-handle';
+            dragHandle.textContent = '↕';
+            dragHandle.title = 'Перетащить задачу';
+            dragHandle.setAttribute('aria-hidden', 'true');
+
+            taskItem.append(dragHandle);
+
+            taskItem.addEventListener('dragstart', function(event) {
+                draggedTaskId = task.id;
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', String(task.id));
+                taskItem.classList.add('dragging');
+            });
+
+            taskItem.addEventListener('dragover', function(event) {
+                if (draggedTaskId === null || draggedTaskId === task.id) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+
+                const middle = taskItem.getBoundingClientRect().top
+                    + taskItem.offsetHeight / 2;
+
+                taskList.querySelectorAll('.drop-before, .drop-after')
+                    .forEach(function(item) {
+                        item.classList.remove('drop-before', 'drop-after');
+                    });
+
+                if (event.clientY < middle) {
+                    taskItem.classList.add('drop-before');
+                } else {
+                    taskItem.classList.add('drop-after');
+                }
+            });
+
+            taskItem.addEventListener('drop', function(event) {
+                event.preventDefault();
+
+                if (draggedTaskId === null || draggedTaskId === task.id) {
+                    return;
+                }
+
+                const middle = taskItem.getBoundingClientRect().top
+                    + taskItem.offsetHeight / 2;
+
+                const insertAfter = event.clientY >= middle;
+                const movedId = draggedTaskId;
+
+                draggedTaskId = null;
+                moveTask(movedId, task.id, insertAfter);
+            });
+
+            taskItem.addEventListener('dragend', function() {
+                draggedTaskId = null;
+                taskItem.classList.remove('dragging');
+
+                taskList.querySelectorAll('.drop-before, .drop-after')
+                    .forEach(function(item) {
+                        item.classList.remove('drop-before', 'drop-after');
+                    });
+            });
         }
 
         const checkbox = document.createElement('input');
@@ -296,7 +400,6 @@ function addTask(event) {
     };
 
     tasks.push(newTask);
-
     saveTasks();
 
     searchInput.value = '';
