@@ -2,8 +2,30 @@
 const main = document.createElement('main');
 main.className = 'app';
 
+const header = document.createElement('header');
+header.className = 'app-header';
+
 const title = document.createElement('h1');
-title.textContent = 'ToDo List';
+title.className = 'app-title';
+title.style.display = 'flex';
+title.style.alignItems = 'center';
+title.style.justifyContent = 'center';
+title.style.gap = 'clamp(7px, 1.8vw, 16px)';
+
+const firstWord = document.createElement('span');
+firstWord.textContent = 'ToDo';
+
+const catsImage = document.createElement('img');
+catsImage.className = 'cats-image';
+catsImage.src = 'images/fish.png';
+catsImage.alt = '';
+catsImage.style.width = 'clamp(50px, 8vw, 82px)';
+
+const secondWord = document.createElement('span');
+secondWord.textContent = 'List';
+
+title.append(firstWord, catsImage, secondWord);
+header.append(title);
 
 const taskForm = document.createElement('form');
 taskForm.className = 'task-form';
@@ -153,7 +175,12 @@ tasksSection.append(
     emptyMessage
 );
 
-main.append(title, taskForm, tasksSection);
+const swansImage = document.createElement('img');
+swansImage.className = 'swans-image';
+swansImage.src = 'images/swans.png';
+swansImage.alt = 'Два лебедя';
+
+main.append(header, taskForm, tasksSection, swansImage);
 document.body.append(main);
 
 let tasks = [];
