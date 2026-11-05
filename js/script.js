@@ -156,8 +156,22 @@ tasksSection.append(
 main.append(title, taskForm, tasksSection);
 document.body.append(main);
 
-const tasks = [];
+let tasks = [];
 let currentFilter = 'all';
+
+try {
+    const savedTasks = JSON.parse(localStorage.getItem('todoTasks'));
+
+    if (Array.isArray(savedTasks)) {
+        tasks = savedTasks;
+    }
+} catch (error) {
+    tasks = [];
+}
+
+function saveTasks() {
+    localStorage.setItem('todoTasks', JSON.stringify(tasks));
+}
 
 function renderTasks() {
     taskList.replaceChildren();
@@ -283,6 +297,8 @@ function addTask(event) {
 
     tasks.push(newTask);
 
+    saveTasks();
+
     searchInput.value = '';
     dateFilterInput.value = '';
     currentFilter = 'all';
@@ -299,6 +315,7 @@ function deleteTask(id) {
 
     if (taskIndex !== -1) {
         tasks.splice(taskIndex, 1);
+        saveTasks();
         renderTasks();
     }
 }
@@ -310,6 +327,7 @@ function toggleTask(id) {
 
     if (task) {
         task.completed = !task.completed;
+        saveTasks();
         renderTasks();
     }
 }
@@ -355,6 +373,7 @@ function editTask(task, taskItem) {
         task.title = newTitle;
         task.date = dateField.value;
 
+        saveTasks();
         renderTasks();
     });
 
